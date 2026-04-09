@@ -1,0 +1,240 @@
+definitions:
+  minecraft.VersionSelectionRequest:
+    properties:
+      core_option:
+        type: string
+      core_type:
+        type: string
+      version:
+        type: string
+    required:
+    - core_option
+    - core_type
+    - version
+    type: object
+  v1.ServerInfo:
+    properties:
+      version:
+        type: string
+    type: object
+  v1.ServerStatus:
+    properties:
+      status:
+        description: '"UP" или "DOWN"'
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/minecraft/current:
+    get:
+      description: Returns currently selected server type and version
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ServerInfo'
+      summary: Get current server configuration
+      tags:
+      - minecraft
+  /api/v1/minecraft/select:
+    post:
+      consumes:
+      - application/json
+      description: Saves selected Minecraft version and server type
+      parameters:
+      - description: Selection data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/minecraft.VersionSelectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Select Minecraft version and core
+      tags:
+      - minecraft
+  /api/v1/minecraft/versions:
+    get:
+      description: Returns list of available Minecraft versions and server cores
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns versions and cores
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get available Minecraft versions and cores
+      tags:
+      - minecraft
+  /api/v1/server/ip:
+    get:
+      description: Returns the host server's external IP address
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get host server IP
+      tags:
+      - minecraft
+  /api/v1/server/properties:
+    get:
+      description: Returns all fields from server.properties as JSON
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Minecraft server properties
+      tags:
+      - minecraft
+    put:
+      consumes:
+      - application/json
+      description: Updates fields in server.properties from JSON body
+      parameters:
+      - description: Properties to update
+        in: body
+        name: properties
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Minecraft server properties
+      tags:
+      - minecraft
+  /api/v1/server/restart:
+    post:
+      description: Перезагружает сервер Minecraft через docker-compose
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Перезагрузка сервера Minecraft
+      tags:
+      - minecraft
+  /api/v1/server/start:
+    post:
+      description: Запускает сервер Minecraft через docker-compose
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Запуск сервера Minecraft
+      tags:
+      - minecraft
+  /api/v1/server/status:
+    get:
+      description: Returns Minecraft server status based on Docker container state
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ServerStatus'
+      summary: Get Minecraft server status
+      tags:
+      - minecraft
+  /api/v1/server/stop:
+    post:
+      description: Останавливает сервер Minecraft через docker-compose
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Остановка сервера Minecraft
+      tags:
+      - minecraft
+swagger: "2.0"
