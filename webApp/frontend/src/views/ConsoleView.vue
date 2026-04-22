@@ -1,10 +1,9 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 
 const logs = ref('')
 const error = ref('')
-let ws
 
 const command = ref('')
 const rconResponse = ref('')
@@ -21,7 +20,7 @@ function scrollToBottom() {
 }
 
 onMounted(() => {
-// Имитируем загрузку логов без реального WebSocket
+  // Имитируем загрузку логов с цветами Catppuccin
   logs.value = "[INFO] Starting Minecraft server version 1.20.1\n" +
                "[INFO] Loading properties...\n" +
                "[INFO] Default game type: SURVIVAL\n" +
@@ -30,10 +29,9 @@ onMounted(() => {
                "[INFO] Preparing level \"world\"\n" +
                "[INFO] Done (2.451s)! For help, type \"help\"";
   
-  error.value = ''; // Очищаем ошибку, чтобы консоль показалась
+  error.value = ''; 
   scrollToBottom();
   
-  // Можно даже добавить "эффект печати" через секунду
   setTimeout(() => {
     logs.value += "\n[INFO] Player Gemini joined the game";
     scrollToBottom();
@@ -43,13 +41,12 @@ onMounted(() => {
 async function sendRconCommand() {
   rconError.value = ''
   rconResponse.value = ''
-  if (!command.value.trim()) {
-    return
-  }
+  if (!command.value.trim()) return
   try {
     const res = await axios.post('/api/v1/console/rcon', { command: command.value })
     rconResponse.value = res.data.response
     command.value = ''
+    scrollToBottom()
   } catch (e) {
     rconError.value = e.response?.data?.error || e.message
   }
@@ -57,67 +54,56 @@ async function sendRconCommand() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 flex items-center justify-center">
-    <div class="w-full bg-gray-800 rounded-none p-0" style="margin-left: 14rem;">
-      <h2 class="text-2xl font-bold mb-4 text-white flex items-center gap-2 px-8 pt-8">
-        <span class="pi pi-terminal text-green-400"></span>
-        Server Console
+  <div class="min-h-screen bg-ctp-base transition-all duration-300">
+    <div class="lg:ml-64 pt-20 lg:pt-0 min-h-screen bg-ctp-mantle shadow-2xl flex flex-col">
+      
+      <h2 class="text-2xl font-bold mb-4 text-ctp-text flex items-center gap-3 px-8 pt-8">
+        <span class="pi pi-terminal text-ctp-mauve"></span>
+        Игровая консоль
       </h2>
+
       <div
-        class="bg-black text-green-400 font-mono rounded-none px-8 pb-8 pt-4"
-        style="height: calc(100vh - 13rem); width: calc(100vw - 14rem); overflow: hidden;"
+        class="bg-ctp-crust text-ctp-text font-mono rounded-t-3xl mx-4 lg:mx-8 mb-8 p-6 shadow-inner border border-ctp-surface0 flex-1 flex flex-col"
+        style="height: calc(100vh - 14rem); overflow: hidden;"
       >
         <template v-if="!error">
-          <div style="width:100%;height:100%;overflow:hidden;display:flex;flex-direction:column;height:100%;">
-            <div
-              ref="logsContainer"
-              style="flex:1 1 0;overflow-y:auto;"
-              class="console-scrollbar"
-            >
-              <pre
-                class="whitespace-pre-wrap break-words m-0"
-                style="overflow-y: visible; max-width:100vw; max-height:100%;"
-              >{{ logs.trim() ? logs : 'Waiting for console output...' }}</pre>
-              <div v-if="rconResponse" class="text-green-400 whitespace-pre-wrap">{{ rconResponse }}</div>
-              <div v-if="rconError" class="text-red-400">{{ rconError }}</div>
+          <div class="flex flex-col h-full">
+            <div ref="logsContainer" class="flex-1 overflow-y-auto console-scrollbar mb-4">
+              <pre class="whitespace-pre-wrap break-words m-0 text-ctp-subtext leading-relaxed">
+                <span class="text-ctp-blue">{{ logs.trim() ? logs : 'Ожидание вывода...' }}</span>
+              </pre>
             </div>
-            <form
-              @submit.prevent="sendRconCommand"
-              class="flex items-center gap-2 mt-2"
-              autocomplete="off"
-              style="background: transparent; outline: none; box-shadow: none; border: none;"
-            >
-              <span class="text-green-400 font-mono select-none">$</span>
-              <input
-                v-model="command"
-                type="text"
-                placeholder="Enter RCON command"
-                class="flex-1 px-3 py-2 rounded bg-black text-green-200 border-0 focus:outline-none font-mono"
-                style="border-width:0;"
-                autocomplete="off"
-                @keyup.enter="sendRconCommand"
-              />
+
+            <form @submit.prevent="sendRconCommand" class="flex items-center gap-3 p-3 bg-ctp-base rounded-xl border border-ctp-surface0 focus-within:border-ctp-mauve transition-all">
+              <span class="text-ctp-mauve font-bold select-none">λ</span>
+              <input v-model="command" type="text" class="flex-1 bg-transparent border-0 focus:outline-none text-ctp-text font-mono" placeholder="Введите команду..." />
+              <button type="submit" class="text-ctp-mauve"><i class="pi pi-send"></i></button>
             </form>
           </div>
-        </template>
-        <template v-else>
-          <div class="text-red-400 text-center py-16">{{ error }}</div>
         </template>
       </div>
     </div>
   </div>
 </template>
-
 <style scoped>
+/* Кастомный скроллбар в стиле Catppuccin */
 .console-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: #585b70 transparent; /* ctp-surface2 */
 }
 .console-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  background: transparent;
+  width: 6px;
 }
 .console-scrollbar::-webkit-scrollbar-thumb {
+  background: #585b70;
+  border-radius: 10px;
+}
+.console-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Эффект свечения для текста */
+pre {
+  text-shadow: 0 0 5px rgba(205, 214, 244, 0.05);
 }
 </style>

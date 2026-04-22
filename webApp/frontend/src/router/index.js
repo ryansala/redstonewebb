@@ -3,6 +3,8 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import ServerView from '@/views/ServerView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import ConsoleView from '@/views/ConsoleView.vue'
+// Импортируем новый компонент
+import FilesView from '@/views/FilesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,9 +25,15 @@ const router = createRouter({
       component: ConsoleView,
     },
     {
-        path: '/:cathAll(.*)',
-        name: 'not-fount',
-        component: NotFoundView,
+      // Добавляем путь для файлов
+      path: '/files',
+      name: 'files',
+      component: FilesView,
+    },
+    {
+      path: '/:catchAll(.*)', // Исправил опечатку в параметре catchAll
+      name: 'not-found',     // Исправил опечатку в name
+      component: NotFoundView,
     },
   ],
 })
